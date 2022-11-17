@@ -239,6 +239,7 @@ public class Agent implements Comparable<Agent>{
 			}		
 		}
 	}
+	//目前存在问题
 	@Override
 	public int compareTo(Agent agent) {
 		if(matches == null) return 1;
