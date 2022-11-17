@@ -24,21 +24,21 @@ public class PSTM {
 	}
 	public void initPreference()
 	{
-		Agent [] pre1 = {courses[0], courses[3], courses[2], courses[1]};
+		Agent [][] pre1 = {{courses[0]}, {courses[3]}, {courses[2]}, {courses[1]}};
 		students[0].addPre(pre1);
-		Agent [] pre2 = {courses[0], courses[2], courses[3], courses[1]};
+		Agent [][] pre2 = {{courses[0]}, {courses[2]}, {courses[3]}, {courses[1]}};
 		students[1].addPre(pre2);
-		Agent [] pre3 = {courses[3], courses[0], courses[2], courses[1]};
+		Agent [][] pre3 = {{courses[3]}, {courses[0]}, {courses[2],courses[0]}, {courses[1]}};
 		students[2].addPre(pre3);
-		Agent [] pre7 = {courses[0], courses[2], courses[1], courses[3]};
+		Agent [][] pre7 = {{courses[0]}, {courses[2]}, {courses[1]}, {courses[3]}};
 		students[3].addPre(pre7);
-		Agent [] pre4 = {students[3], students[0], students[2], students[1]};
+		Agent [][] pre4 = {{students[3]}, {students[0]}, {students[2]}, {students[1]}};
 		courses[0].addPre(pre4);
-		Agent [] pre5 = {students[0], students[3], students[2], students[1]};
+		Agent [][] pre5 = {{students[0]}, {students[3]}, {students[2]}, {students[1]}};
 		courses[1].addPre(pre5);
-		Agent [] pre6 = {students[0], students[2], students[3], students[1]};
+		Agent [][] pre6 = {{students[0]}, {students[2]}, {students[3]}, {students[1]}};
 		courses[2].addPre(pre6);
-		Agent [] pre8 = {students[0], students[2], students[1], students[3]};
+		Agent [][] pre8 = {{students[0]}, {students[2]}, {students[1]}, {students[3]}};
 		courses[3].addPre(pre8);
 	}
 	public Agent[] students() {
@@ -67,7 +67,10 @@ public class PSTM {
 			//选择破坏对集合中最偏好的个体，达成匹配（需判断是否有曾广环路）
 			if(blocks.length == 0) continue;
 			Agent maxCourse = student.maxpreS(blocks);
-			student.matching(maxCourse);
+			maxCourse.unassign();
+			student.asign(maxCourse);
+			
 		}
+
 	}
 }
