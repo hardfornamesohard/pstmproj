@@ -226,21 +226,17 @@ public class Agent implements Comparable<Agent>{
 			Agent agent = this.matches[matches.length-1];
 			//该个体中删除最差参与人
 			this.matches[matches.length-1] = null;
-			this.onhold--;
-			
-			//对于有虚拟容量限制的参与人还需要回退虚拟容量
-			
+			this.onhold--;		
+			//对于有虚拟容量限制的参与人还需要回退虚拟容量		
 			//同时从最差参与人个体中删除该个体
 			Agent[] find = agent.matches();
 			for(int i = 0; i < find.length; i++) {
 				if(agent.matches[i] == this) {
 					agent.matches[i] = null;
 					agent.onhold--;
-					agent.vcapacity--;
-					
+					agent.vcapacity--;			
 				}
-			}
-			
+			}		
 		}
 	}
 	@Override
