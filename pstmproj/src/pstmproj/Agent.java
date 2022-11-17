@@ -1,4 +1,5 @@
 package pstmproj;
+
 import util.Bubble;
 /*
  * 匹配参与人
@@ -9,8 +10,14 @@ public class Agent implements Comparable<Agent>{
 	private final String name;
 	//真实容量
 	private final int capacity;
-	//参与人偏好列表，索引表示偏好度，最偏好0索引处的参与人
-	private Agent[] preference;
+	/*参与人偏好列表，索引表示偏好度，最偏好0索引处的参与人
+	***二维数组表示参与人偏好，其中行表示偏好程度顺序，第0行偏好程度最高
+	****行中的所有列表示同一偏好程度的所有对方集合的参与人
+	*****对当前对象来说，同一行中的参与人是无差异的
+	******某行中的某个参与人出现在了该行的前后行表示弱偏好
+	*******某行与相邻行不存在相同的参与人表示严格偏好
+	*/
+	private Agent[][] preference;
 	//虚拟容量
 	private int vcapacity;
 	//已使用容量
@@ -30,10 +37,10 @@ public class Agent implements Comparable<Agent>{
 	public int capacity() {
 		return this.capacity;
 	}
-	public Agent[] preference() {
+	public Agent[][] preference() {
 		return this.preference;
 	}
-	public void addPre(Agent[] agents) {
+	public void addPre(Agent[][] agents) {
 		this.preference = agents;
 	}
 	public void increaseC() {
@@ -56,7 +63,7 @@ public class Agent implements Comparable<Agent>{
 		this.matches[i] = agent;
 	}
 	//判断当前是否还有容量余额
-	private boolean lessCap() {
+	public boolean lessCap() {
 		//如果当前对象是student，判断是否有容量余额需要判断是否小于虚拟容量
 		if(vcapacity < capacity) return onhold < vcapacity;
 		//当前对象为course判断是否小于真实容量
@@ -68,17 +75,23 @@ public class Agent implements Comparable<Agent>{
 	}
 	//判断agent是否在当前对象的偏好列表中
 	private boolean contains(Agent agent) {
-		for(Agent a : preference) {
-			if(a == null) return false;
-			if(a.equals(agent)) return true;
+		//遍历偏好集合
+		for(Agent[] order : preference) {
+			//偏好列表为空，返回false
+			if(order.length == 0) return false;
+			//遍历不同偏好程度的参与人
+			for(Agent pre : order) {
+				if(pre.equals(agent)) return true;
+			}
 		}
 		return false;
 	}
 	//判断agent是否与当前对象匹配
 	private boolean matched(Agent agent) {
+		if(onhold == 0) return false;
 		for(Agent a : matches) {
-			if(a == null) return false;
-			if(a.equals(agent)) return true;
+		//	if(a==null)System.out.println("" + null + "" + onhold);
+			if(agent.equals(a)) return true;
 		}
 		return false;
 	}
@@ -131,10 +144,12 @@ public class Agent implements Comparable<Agent>{
 			}
 		}
 	}
-	//返回agent在当前对象偏好列表中的排序
+	//返回agent在当前对象偏好列表中的排序，即行标
 	private int indexOf(Agent agent) {
 		for(int i = 0; i < preference.length; i++) {
-			if(preference[i].equals(agent)) return i;
+			for(Agent a : preference[i]) {
+				if(a.equals(agent)) return i;
+			}
 		}
 		//查找失败
 		return -1;
@@ -142,18 +157,20 @@ public class Agent implements Comparable<Agent>{
 	//返回当前参与人的破坏对集合S(当前对象是course时通过测试)
 	public Agent[] blockS() {
 		//定义破坏对集合,！！！！
-		Agent [] blocks = new Agent[preference.length - onhold];
+		Agent [] blocks = new Agent[preference.length];
 		//遍历当前参与人的偏好列表，寻找一个破坏对
-		for(Agent course : preference()) {
-			//course已匹配，直接跳过
-			if(matched(course)) continue;
-			//将破坏对添加到破坏对集合中
-			if(block(course)) {
-				int i = 0;
-				while(blocks[i] != null) {
-					i++;
+		//遍历行
+		for(Agent[] order : preference()) {
+			for(Agent agent : order) {
+				//agent已匹配，直接跳过
+				if(matched(agent)) continue;
+				//将破坏对添加到破坏对集合中
+				if(block(agent)) {
+					int i = 0;
+					while(blocks[i++] != null) {
+					}
+					blocks[i - 1] = agent;
 				}
-				blocks[i] = course;
 			}
 		}
 		//去除blocks中的null
@@ -161,19 +178,27 @@ public class Agent implements Comparable<Agent>{
 		while(blocks[j]!=null && (j < blocks.length-1)) {
 			j++;
 		}
-		Agent[] results = new Agent[j];
-		System.arraycopy(blocks, 0, results, 0, j);
+		Agent[] results = new Agent[j+1];
+		System.arraycopy(blocks, 0, results, 0, j+1);
+		/*System.out.println(results.length);
+		for(Agent agent : results) {
+			System.out.print(agent.name() + ",");
+		}
+		System.out.println();*/
 		//blocks数组中需要剔除onhold中的参与人 done
 		return results;
 	}
 	//返回破坏对集合S的最偏好个体s
 	public Agent maxpreS(Agent[] blockS) {
-		Bubble.sort(blockS);
-
-		return blockS[blockS.length - 1];
+		//Bubble.sort(blockS);
+		/*for(Agent agent : blockS) {
+			System.out.print(agent.name() + ",");
+		}
+		System.out.println();*/
+		return blockS[0];
 	}
 	//达成匹配
-	public void matching(Agent agent) {
+	public void asign(Agent agent) {
 		//更新双方参与人
 		//更新matches
 		for(int i = 0; i < matches.length; i++) {
@@ -193,6 +218,28 @@ public class Agent implements Comparable<Agent>{
 		this.increaseOnhold();
 		agent.increaseOnhold();
 	}
+	//取消course-student匹配，当前对象为course
+	public void unassign() {
+		//最偏好的个体无容量余额时，需要取消匹配
+		if(!lessCap()) {
+			//找到该个体已匹配参与人中最差的参与人
+			Agent agent = this.matches[matches.length-1];
+			//该个体中删除最差参与人
+			this.matches[matches.length-1] = null;
+			this.onhold--;		
+			//对于有虚拟容量限制的参与人还需要回退虚拟容量		
+			//同时从最差参与人个体中删除该个体
+			Agent[] find = agent.matches();
+			for(int i = 0; i < find.length; i++) {
+				if(agent.matches[i] == this) {
+					agent.matches[i] = null;
+					agent.onhold--;
+					agent.vcapacity--;			
+				}
+			}		
+		}
+	}
+	//目前存在问题
 	@Override
 	public int compareTo(Agent agent) {
 		if(matches == null) return 1;
