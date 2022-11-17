@@ -85,21 +85,19 @@ public class Agent implements Comparable<Agent>{
 	public boolean block(Agent agent) {
 		//agent不在当前对象的偏好列表中，或者当前对象不在agent的偏好列表中返回false;
 		if(!contains(agent) || !agent.contains(this)) return false;
-		//当前对象有容量余额，则判断agent的偏好列表中是否有当前对象
+		//当前对象有容量余额，则判断agent是否有容量余额
 		if(lessCap()) {
-			//agent偏好列表有当前对象,则判断agent是否容量余额
-			if(agent.contains(this))
 			//agent有容量余额
-				if(agent.lessCap())return true;
-				//agent无容量余额则判断agent是否更偏好当前对象
-				else if(agent.prefer(this))
-				//agent更偏好当前对象而非当前匹配集合的最差参与人
-				{
-					//解除agent的匹配					
-					return true;
-				}
-				//agent非更偏好当前对象
-				else return false;
+			if(agent.lessCap())return true;
+			//agent无容量余额但当前对象有容量余额，则判断agent是否更偏好当前对象
+			else if(agent.prefer(this))
+			//agent更偏好当前对象而非当前匹配集合的最差参与人
+			{
+				//解除agent的匹配					
+				return true;
+			}
+			//agent非更偏好当前对象
+			else return false;
 		}
 		//当前对象无容量余额，但相比当前对象匹配的最差参与人，当前对象更喜欢agent
 		else if(this.prefer(agent)) {
@@ -111,13 +109,27 @@ public class Agent implements Comparable<Agent>{
 		return false;
 
 	}
-	//当前对象是否更喜欢agent而非当前对象匹配的最差参与人
+	//当前对象是否更喜欢agent而非当前对象匹配的某个参与人
 	private boolean prefer(Agent agent) {
-		if(matches == null) return true;
-		//当前对象匹配的最差参与人
-		Agent minAgent = matches[matches.length - 1];
-		//通过比较当前对象最差参与人与agent在当前对象偏好列表中的排序
-		return indexOf(agent) > indexOf(minAgent);
+		boolean result = false;
+		//根据当前对象的类型，选择比较规则
+		result = vcapacity < capacity? onhold < vcapacity : onhold < capacity;
+		//如果当前对象的匹配集合为非满，返回true
+		if(result) return true;
+		else {
+			//获取agent在当前对象偏好列表中的位置
+			int indexA = indexOf(agent);
+			//遍历当前对象的匹配集合，并获取当前对象所匹配参与人在当前对象偏好列表中的位置
+			int indexB = -1;
+			int i = 0;
+			while(true) {
+				//若能找到一个更大的索引，返回true
+				indexB = indexOf(matches[i++]);
+				if(indexA < indexB) return true;
+				//matches数组遍历完毕，返回false
+				if(i == matches.length) return false;
+			}
+		}
 	}
 	//返回agent在当前对象偏好列表中的排序
 	private int indexOf(Agent agent) {
