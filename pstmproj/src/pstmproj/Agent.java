@@ -1,10 +1,10 @@
 package pstmproj;
 
-import util.Bubble;
+
 /*
  * 匹配参与人
  */
-public class Agent implements Comparable<Agent>{
+public class Agent{
 
 	//参与人名称
 	private final String name;
@@ -160,41 +160,31 @@ public class Agent implements Comparable<Agent>{
 		Agent [] blocks = new Agent[preference.length];
 		//遍历当前参与人的偏好列表，寻找一个破坏对
 		//遍历行
+		int i = 0;
 		for(Agent[] order : preference()) {
 			for(Agent agent : order) {
-				//agent已匹配，直接跳过
+				//当前对象与agent已匹配，直接跳过
 				if(matched(agent)) continue;
 				//将破坏对添加到破坏对集合中
 				if(block(agent)) {
-					int i = 0;
-					while(blocks[i++] != null) {
+					
+					//blocks数组默认存null，只需要在索引范围内找到第一个null
+					while(blocks[i++] != null && i < blocks.length) {
 					}
+					//agent若与当前对象构成破坏对，将agent添加到当前对象的破坏对集合
 					blocks[i - 1] = agent;
 				}
 			}
 		}
 		//去除blocks中的null
-		int j = 0 ;
-		while(blocks[j]!=null && (j < blocks.length-1)) {
-			j++;
-		}
-		Agent[] results = new Agent[j+1];
-		System.arraycopy(blocks, 0, results, 0, j+1);
-		/*System.out.println(results.length);
-		for(Agent agent : results) {
-			System.out.print(agent.name() + ",");
-		}
-		System.out.println();*/
+		Agent[] results = new Agent[i];
+		System.arraycopy(blocks, 0, results, 0, i);
 		//blocks数组中需要剔除onhold中的参与人 done
 		return results;
 	}
 	//返回破坏对集合S的最偏好个体s
 	public Agent maxpreS(Agent[] blockS) {
-		//Bubble.sort(blockS);
-		/*for(Agent agent : blockS) {
-			System.out.print(agent.name() + ",");
-		}
-		System.out.println();*/
+		this.BubbleSort(blockS);
 		return blockS[0];
 	}
 	//达成匹配
@@ -217,6 +207,7 @@ public class Agent implements Comparable<Agent>{
 		//更新onhold
 		this.increaseOnhold();
 		agent.increaseOnhold();
+		System.out.println("参与人 " + this.name() + " 与参与人 " + agent.name() + " 达成匹配");
 	}
 	//取消course-student匹配，当前对象为course
 	public void unassign() {
@@ -236,17 +227,24 @@ public class Agent implements Comparable<Agent>{
 					agent.onhold--;
 					agent.vcapacity--;			
 				}
-			}		
+			}	
+			System.out.println("参与人 " + this.name() + " 与参与人 " + agent.name() + " 取消匹配");
 		}
 	}
-	//目前存在问题
-	@Override
-	public int compareTo(Agent agent) {
-		if(matches == null) return 1;
-		//当前对象匹配的最差参与人
-		Agent minAgent = matches[matches.length - 1];
-		//通过比较当前对象最差参与人与agent在当前对象偏好列表中的排序
-		if(indexOf(agent) >= indexOf(minAgent)) return 1;
-		return -1;
+	//破坏对集合中的参与人排序，找出最偏好的参与人
+	public  void BubbleSort(Agent[] agents) {
+		for(int x = agents.length - 1; x  > 0; x-- ) {
+			for(int y = 0; y < x; y++ ) {
+				if(greater(agents[y], agents[y+1]))exchange(agents, y, y + 1);
+			}
+		}
+	}
+	private  boolean greater(Agent v, Agent w) {
+		return indexOf(v) >= indexOf(w);
+	}
+	private  void exchange(Agent []agents, int x, int y) {
+		Agent t = agents[x];
+		agents[x] = agents[y];
+		agents[y] = t;
 	}
 }
