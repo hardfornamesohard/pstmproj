@@ -22,13 +22,14 @@ public class Agent{
 	private int vcapacity;
 	//已使用容量
 	private int onhold;
-	//此参与人匹配到的参与人列表，按优劣排序，每次匹配后需要更新
+	//此参与人匹配到的参与人列表，按优劣排序/*对被提议方可能不是*/，每次匹配后需要更新
 	private Agent[] matches;
 	public Agent(String name, int capacity) {
 		this.name = name;
 		this.capacity = capacity;
 		this.preference = null;
 		this.vcapacity = 0;
+		this.onhold = 0;
 		this.matches = new Agent[capacity];
 	}
 	public String name() {
@@ -207,10 +208,11 @@ public class Agent{
 		//更新onhold
 		this.increaseOnhold();
 		agent.increaseOnhold();
-		System.out.println("参与人 " + this.name() + " 与参与人 " + agent.name() + " 达成匹配");
+		System.out.println("参与人 " + this.name() + "(已使用的匹配额度"+ this.onhold + ")" + " 与参与人 " + agent.name() + "(已使用的匹配额度"+ agent.onhold + ")" + " 达成匹配");
+		
 	}
 	//取消course-student匹配，当前对象为course
-	public void unassign() {
+	public boolean unassign() {
 		//最偏好的个体无容量余额时，需要取消匹配
 		if(!lessCap()) {
 			//找到该个体已匹配参与人中最差的参与人
@@ -220,15 +222,29 @@ public class Agent{
 			this.onhold--;		
 			//对于有虚拟容量限制的参与人还需要回退虚拟容量		
 			//同时从最差参与人个体中删除该个体
-			Agent[] find = agent.matches();
-			for(int i = 0; i < find.length; i++) {
-				if(agent.matches[i] == this) {
-					agent.matches[i] = null;
-					agent.onhold--;
-					agent.vcapacity--;			
-				}
-			}	
-			System.out.println("参与人 " + this.name() + " 与参与人 " + agent.name() + " 取消匹配");
+			agent.del(this);
+			System.out.println("参与人 " + this.name() + "(已使用的匹配额度"+ this.onhold + ")" + " 与参与人 " + agent.name() + "(已使用的匹配额度"+ agent.onhold + ")" + " 取消匹配");
+			return true;
+		}
+		return false;
+	}/*遍历matches数组时可能会抛出空指针异常*/
+	//添加匹配对后可能会出现augmentationcycle，调用此方法回退本次匹配
+	//取消当前对象与agent对象的匹配
+	public void unassignCycle(Agent agent) {
+		//找到当前对象匹配集合中的agent,并在集合中删除
+		this.del(agent);
+		//找到agent匹配集合中的当前对象,并在集合中删除
+		agent.del(this);
+	}
+	//从当前对象匹配集合中删除指定参与人
+	private void del(Agent agent) {
+		for(int i = 0; i < this.matches.length; i++) {
+			if(agent.equals(this.matches[i])) {
+				this.matches[i] = null;
+				this.onhold--;
+				this.vcapacity--;
+				break;
+			}
 		}
 	}
 	//破坏对集合中的参与人排序，找出最偏好的参与人
