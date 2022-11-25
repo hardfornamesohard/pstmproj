@@ -88,7 +88,7 @@ public class Agent{
 		return false;
 	}
 	//判断agent是否与当前对象匹配
-	private boolean matched(Agent agent) {
+	public boolean matched(Agent agent) {
 		if(onhold == 0) return false;
 		for(Agent a : matches) {
 		//	if(a==null)System.out.println("" + null + "" + onhold);
@@ -170,7 +170,7 @@ public class Agent{
 				if(block(agent)) {
 					
 					//blocks数组默认存null，只需要在索引范围内找到第一个null
-					while(blocks[i++] != null && i < blocks.length) {
+					while(i < blocks.length && blocks[i++] != null) {
 					}
 					//agent若与当前对象构成破坏对，将agent添加到当前对象的破坏对集合
 					blocks[i - 1] = agent;
@@ -212,7 +212,7 @@ public class Agent{
 		
 	}
 	//取消course-student匹配，当前对象为course
-	public boolean unassign() {
+	public Agent unassign() {
 		//最偏好的个体无容量余额时，需要取消匹配
 		if(!lessCap()) {
 			//找到该个体已匹配参与人中最差的参与人
@@ -224,9 +224,9 @@ public class Agent{
 			//同时从最差参与人个体中删除该个体
 			agent.del(this);
 			System.out.println("参与人 " + this.name() + "(已使用的匹配额度"+ this.onhold + ")" + " 与参与人 " + agent.name() + "(已使用的匹配额度"+ agent.onhold + ")" + " 取消匹配");
-			return true;
+			return agent;
 		}
-		return false;
+		return null;
 	}/*遍历matches数组时可能会抛出空指针异常*/
 	//添加匹配对后可能会出现augmentationcycle，调用此方法回退本次匹配
 	//取消当前对象与agent对象的匹配
@@ -246,6 +246,18 @@ public class Agent{
 				break;
 			}
 		}
+	}
+	//当前对象认为agent1至少和agent2一样好
+	public boolean weak(Agent agent1, Agent agent2) {
+		return indexOf(agent1) <= indexOf(agent2);
+	}
+	//当前对象认为agent1比agent2好
+	public boolean strict(Agent agent1, Agent agent2) {
+		return indexOf(agent1) < indexOf(agent2);
+	}
+	//当前对象认为agent1和agent2一样好
+	public boolean indifferent(Agent agent1, Agent agent2) {
+		return indexOf(agent1) == indexOf(agent2);
 	}
 	//破坏对集合中的参与人排序，找出最偏好的参与人
 	public  void BubbleSort(Agent[] agents) {

@@ -16,38 +16,39 @@ public class SymbolTable<Key, Value> {
 	public boolean isEmpty() {
 		return this.N == 0;
 	}
-	public Value get(Key key) {
+	public Agent[] get(Key key) {
+		int count = 0;
 		Node curr = head;
 		while(curr.next != null) {
 			curr = curr.next;
-			if(curr.key.equals(key))return curr.value;	
+			if(curr.key.equals(key))count++;	
 		}
-		return null;
+		if(count == 0) return null;
+		Agent[] values = new Agent[count];
+		Node get = head;
+		int index = 0;
+		while(get.next != null) {
+			get = get.next;
+			if(get.key.equals(key)) {
+				values[index] = (Agent)get.value;
+				index++;
+			}
+		}
+		return values;
 	}
 	public void put(Key key, Value value) {
 		//符号表中已有该key值
-		Node n = head;
-		while(n.next != null) {
-			n = n.next;
-			if(n.key.equals(key)) {
-				//Agent a1 = n.value[0];
-				Agent[] pair = (Agent[])value;
-				Agent[] pair2 = (Agent[])n.value;
-				Agent[] pairs = {pair[0], pair[1], pair2[1]};
-				n.value = (Value)pairs;
-				return;
-			}
-		}
+	
 		//符号表中不存在该key值
 		Node oldfirst = head.next;
 		Node newfirst = new Node(key,value,oldfirst);
 		head.next = newfirst;
 		N++;
 	}
-	public void delete(Key key) {
+	public void delete(Key key, Value value) {
 		Node n = head;
 		while(n.next != null) {
-			if(n.next.key.equals(key)) {
+			if(n.next.key.equals(key) && n.next.value.equals(value)) {
 				n.next = n.next.next;
 				N--;
 				return;
