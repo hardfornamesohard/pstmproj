@@ -14,15 +14,20 @@ public class PSTMSolution {
 		}
 		System.out.println();
 		System.out.println("Æ¥Åä½á¹û:");
-		/*SymbolTable<Agent, Agent> matches = pstm.matchSet();
+		SymbolTable<Agent, Agent> matches = pstm.matchSet();
 		for(Agent agent : courses) {
-			int i = 1;
+			int i = 0;
 			while(matches.get(agent) != null && i < matches.get(agent).length) {
 				System.out.println(agent.name() + " <---> " + matches.get(agent)[i].name());
 				i++;
 			}
 			
-		}*/
+		}
+		for(Agent agent : students) {
+			System.out.println(agent.name() + " vcapacity is : " + agent.vcapacity());
+			
+		}
+		/*
 		for(Agent agent : students) {
 			for(Agent a : agent.matches()) {
 				if(a != null) System.out.println(agent.name() + " <---> " + a.name());
@@ -32,6 +37,6 @@ public class PSTMSolution {
 			for(Agent a : agent.matches()) {
 				if(a != null) System.out.println(agent.name() + " <---> " + a.name());
 			}
-		}	
+		}	*/
 	}
 }
