@@ -205,10 +205,10 @@ public class Agent{
 	//达成匹配
 	public void assign(Agent agent) {
 		//course不能超过额度
-		if(!isSuitor()) {
+	/*	if(!isSuitor()) {
 			if(!lessCap()) return;
 		}
-		else if(!agent.lessCap()) return;
+		else if(!agent.lessCap()) return;*/
 		//更新双方参与人
 		//更新matches
 		for(int i = 0; i < matches.length; i++) {
@@ -254,7 +254,7 @@ public class Agent{
 		this.del(agent);
 		//找到agent匹配集合中的当前对象,并在集合中删除
 		agent.del(this);
-		System.out.println("出现augmentation cycle， 参与人 " + this.name() + "(已使用的匹配额度"+ this.onhold + ")" + " 与参与人 " + agent.name() + "(已使用的匹配额度"+ agent.onhold + ")" + " 取消匹配");
+		System.out.println("参与人 " + this.name() + "(已使用的匹配额度"+ this.onhold + ")" + " 与参与人 " + agent.name() + "(已使用的匹配额度"+ agent.onhold + ")" + " 取消匹配");
 	}
 	//从当前对象匹配集合中删除指定参与人
 	private void del(Agent agent) {

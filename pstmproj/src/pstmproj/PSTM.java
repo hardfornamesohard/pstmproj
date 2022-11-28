@@ -91,12 +91,12 @@ public class PSTM {
 		//得到已匹配的参与人数量，构建cycle
 		int number = 0;
 		for(Agent course : courses) {
-			Agent[] stu = (Agent[])matches.get(course);
+			Agent[] stu = matches.get(course);
 			if(stu != null) {
 				//此course已匹配，计数
 				number++;
 				for(Agent agent : stu) {
-					int stuIndex = indexOf(agent, stu);
+					int stuIndex = indexOf(agent, students);
 					if(marked[stuIndex] == false) {
 						//此student第一次出现在匹配中，计数
 						number++;
@@ -109,16 +109,6 @@ public class PSTM {
 		if((number < 3) | (number % 2 != 0)) return null;
 		//将已匹配的参与人按cycle排列
 		Agent[] cycle = new Agent[number];
-		/*int count2 = matches.size();
-		for(Agent course : courses) {
-			//course已匹配才加入cycle
-			if(matches.get(course) != null) {
-					int index = this.indexOf(matches.get(course), students);
-					System.out.print(agent.name() + " " + index + " ,");
-					System.out.println();
-			}
-				
-		}*/
 		//实际得到[s1, c1, s2, c2]，未按路径排列，需断开匹配
 		int cindex = 1;
 		for(Agent course : courses) {
@@ -231,16 +221,16 @@ public class PSTM {
 			Agent[] path = this.hasAugmentationCycle();
 			if(path != null) {
 				//得到C\{(s, c')},不改变path中参与人数量，仅仅是断开匹配
+				System.out.println("augmentation cycle occured!");
 				student.unassignCycle(maxCourse);
 				//出现增广环时打印取消匹配后的增广路径
 				printPath(path);
-				//this.eliminatePath(path);
+				this.eliminatePath(path);
 			}
 		}
 	}
 	public void printPath(Agent[] path) {
 		if(path != null) {
-			System.out.println("augmentation cycle occured!");
 			StringBuilder sb = new StringBuilder();
 			sb.append("[");
 			for(Agent agent : path) {
@@ -254,24 +244,56 @@ public class PSTM {
 	}
 	private void eliminatePath(Agent[] path) {
 		//选择路径上的第一对参与人
+		int ePos = 0;
 		Agent[] e = new Agent[2];
-		System.arraycopy(path, 0, e, 0, 2);
+		System.arraycopy(path, ePos, e, 0, 2);
+		System.out.println(e[0].name() + ":" +  e[1].name());
 		while(e[0] != null && e[1] != null) {
+			//e is not a matching
 			if(e[0].isSuitor() && !e[1].isSuitor()) {
-				e[0].assign(e[1]);
-				//Agent[] cycle = this.hasAugmentationCycle();
-				if(e[1].lessCap()) break;
+				//c is not over-matched
+				if(e[1].lessCap()) {
+					e[0].assign(e[1]);
+					matches.put(e[1], e[0]);
+					return;
+				}//c is over-matched
+				else {
+					//c strictly perfers s(e[0]) to a current partner
+					Agent[] matchedtoC = matches.get(e[1]);
+					e[1].BubbleSort(matchedtoC);
+ 					Agent curr = matchedtoC[matchedtoC.length - 1];
+					if(e[1].strict(e[0], curr)) {
+						e[1].unassign();
+						matches.delete(e[1], curr);
+						increaseCap();
+					}
+					//e be the next pair
+					else {
+						ePos++;
+						System.arraycopy(path, ePos, e, 0, 2);
+					}
+				}
+				Agent[] cycle = this.hasAugmentationCycle();
+				if(cycle == null)continue;
+				//efgh
+				else {
+					
+				}
 				
+			}
+			//e is a matching
+			else {
+				e[0].unassignCycle(e[1]);
+				matches.delete(e[0], e[1]);
+				ePos++;
+				System.arraycopy(path, ePos, e, 0, 2);
+				Agent[] cycle = this.hasAugmentationCycle();
+				if(cycle == null)continue;
+				//efgh
+				else {
+					
+				}
 			}
 		}
 	}
-	private void e_is_not_match(Agent[] e) {
-		if(e[0].isSuitor() && !e[1].isSuitor()) {
-			e[0].assign(e[1]);
-			Agent[] cycle = this.hasAugmentationCycle();
-			if(e[1].lessCap()) return;
-			
-		}
-	}
-
 }
