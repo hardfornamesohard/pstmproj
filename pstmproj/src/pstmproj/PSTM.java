@@ -1,6 +1,8 @@
 package pstmproj;
 
 
+import java.util.TimerTask;
+
 import util.SymbolTable;
 
 public class PSTM {
@@ -142,7 +144,7 @@ public class PSTM {
 				sindex += 2;
 			}
 		}
-		System.out.println(number);
+		//System.out.println(number);
 		//[s1, c1, s2, c2]调整顺序 变成 ---> [s2, c1, s1, c2]
 		//索引0处和索引2，4，6，8，...处交换元素
 		
@@ -222,7 +224,7 @@ public class PSTM {
 				matches.delete(maxCourse, del);
 			}
 			//increase-cap 6a&6c
-			student.asign(maxCourse);
+			student.assign(maxCourse);
 			matches.put(maxCourse, student);
 			//increase-cap 6b
 			//达成匹配会产生augmentationCycle则回退
@@ -232,7 +234,7 @@ public class PSTM {
 				student.unassignCycle(maxCourse);
 				//出现增广环时打印取消匹配后的增广路径
 				printPath(path);
-				this.eliminatePath(path);
+				//this.eliminatePath(path);
 			}
 		}
 	}
@@ -251,7 +253,25 @@ public class PSTM {
 		}
 	}
 	private void eliminatePath(Agent[] path) {
-		
+		//选择路径上的第一对参与人
+		Agent[] e = new Agent[2];
+		System.arraycopy(path, 0, e, 0, 2);
+		while(e[0] != null && e[1] != null) {
+			if(e[0].isSuitor() && !e[1].isSuitor()) {
+				e[0].assign(e[1]);
+				//Agent[] cycle = this.hasAugmentationCycle();
+				if(e[1].lessCap()) break;
+				
+			}
+		}
+	}
+	private void e_is_not_match(Agent[] e) {
+		if(e[0].isSuitor() && !e[1].isSuitor()) {
+			e[0].assign(e[1]);
+			Agent[] cycle = this.hasAugmentationCycle();
+			if(e[1].lessCap()) return;
+			
+		}
 	}
 
 }

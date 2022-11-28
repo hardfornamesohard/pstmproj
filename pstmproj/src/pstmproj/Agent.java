@@ -52,6 +52,9 @@ public class Agent{
 	public void increaseOnhold() {
 		this.onhold++;
 	}
+	public boolean isSuitor() {
+		return isSuitor;
+	}
 	//无需设置虚拟容量的参与人虚拟容量设置为最大容量
 	public void increaseMax() {
 		if(!isSuitor) this.vcapacity = this.capacity;	
@@ -200,7 +203,12 @@ public class Agent{
 		return blockS[0];
 	}
 	//达成匹配
-	public void asign(Agent agent) {
+	public void assign(Agent agent) {
+		//course不能超过额度
+		if(!isSuitor()) {
+			if(!lessCap()) return;
+		}
+		else if(!agent.lessCap()) return;
 		//更新双方参与人
 		//更新matches
 		for(int i = 0; i < matches.length; i++) {

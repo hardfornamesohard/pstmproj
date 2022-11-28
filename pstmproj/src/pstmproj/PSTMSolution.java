@@ -23,11 +23,12 @@ public class PSTMSolution {
 			}
 			
 		}
+		System.out.println(matches.size());
 		for(Agent agent : students) {
 			System.out.println(agent.name() + " vcapacity is : " + agent.vcapacity());
 			
 		}
-		/*
+		
 		for(Agent agent : students) {
 			for(Agent a : agent.matches()) {
 				if(a != null) System.out.println(agent.name() + " <---> " + a.name());
@@ -37,6 +38,6 @@ public class PSTMSolution {
 			for(Agent a : agent.matches()) {
 				if(a != null) System.out.println(agent.name() + " <---> " + a.name());
 			}
-		}	*/
+		}	
 	}
 }
