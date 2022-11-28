@@ -230,6 +230,7 @@ public class PSTM {
 			if(path != null) {
 				//得到C\{(s, c')},不改变path中参与人数量，仅仅是断开匹配
 				student.unassignCycle(maxCourse);
+				
 				//出现增广环时打印取消匹配后的增广路径
 				printPath(path);
 				this.eliminatePath(path);

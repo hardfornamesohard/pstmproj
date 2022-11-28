@@ -37,9 +37,13 @@ public class SymbolTable<Key, Value> {
 		return values;
 	}
 	public void put(Key key, Value value) {
-		//符号表中已有该key值
-	
-		//符号表中不存在该key值
+		//符号表中已有该key值,且已有改value，则跳过
+		Node n = head;
+		while(n.next!=null) {
+			n = n.next;
+			if(n.key == key && n.value == value) return;
+		}
+		//符号表中不存在该key-value对
 		Node oldfirst = head.next;
 		Node newfirst = new Node(key,value,oldfirst);
 		head.next = newfirst;
