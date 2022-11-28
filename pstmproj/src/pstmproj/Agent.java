@@ -22,14 +22,17 @@ public class Agent{
 	private int vcapacity;
 	//已使用容量
 	private int onhold;
-	//此参与人匹配到的参与人列表，按优劣排序，每次匹配后需要更新
+	//此参与人匹配到的参与人列表，按优劣排序/*对被提议方可能不是*/，每次匹配后需要更新
 	private Agent[] matches;
-	public Agent(String name, int capacity) {
+	private final boolean isSuitor;
+	public Agent(String name, int capacity, boolean isSuitor) {
 		this.name = name;
 		this.capacity = capacity;
 		this.preference = null;
 		this.vcapacity = 0;
+		this.onhold = 0;
 		this.matches = new Agent[capacity];
+		this.isSuitor = isSuitor;
 	}
 	public String name() {
 		return this.name;
@@ -51,7 +54,7 @@ public class Agent{
 	}
 	//无需设置虚拟容量的参与人虚拟容量设置为最大容量
 	public void increaseMax() {
-		this.vcapacity = this.capacity;
+		if(!isSuitor) this.vcapacity = this.capacity;	
 	}
 	public int vcapacity() {
 		return vcapacity;
@@ -65,13 +68,13 @@ public class Agent{
 	//判断当前是否还有容量余额
 	public boolean lessCap() {
 		//如果当前对象是student，判断是否有容量余额需要判断是否小于虚拟容量
-		if(vcapacity < capacity) return onhold < vcapacity;
+		if(isSuitor) return onhold < vcapacity;
 		//当前对象为course判断是否小于真实容量
 		return onhold < capacity;
 	}
 	//返回当前参与人是否需要增加虚拟容量
 	public boolean addCap() {
-		return vcapacity < capacity;
+		return isSuitor && vcapacity < capacity;
 	}
 	//判断agent是否在当前对象的偏好列表中
 	private boolean contains(Agent agent) {
@@ -87,10 +90,11 @@ public class Agent{
 		return false;
 	}
 	//判断agent是否与当前对象匹配
-	private boolean matched(Agent agent) {
+	public boolean matched(Agent agent) {
 		if(onhold == 0) return false;
+		if(agent == null) return false;
 		for(Agent a : matches) {
-		//	if(a==null)System.out.println("" + null + "" + onhold);
+			
 			if(agent.equals(a)) return true;
 		}
 		return false;
@@ -126,7 +130,7 @@ public class Agent{
 	private boolean prefer(Agent agent) {
 		boolean result = false;
 		//根据当前对象的类型，选择比较规则
-		result = vcapacity < capacity? onhold < vcapacity : onhold < capacity;
+		result = isSuitor? onhold < vcapacity : onhold < capacity;
 		//如果当前对象的匹配集合为非满，返回true
 		if(result) return true;
 		else {
@@ -154,28 +158,35 @@ public class Agent{
 		//查找失败
 		return -1;
 	}
+	//破坏对集合的最大长度，不排除弱偏好导致的重叠
+	private int blockSize() {
+		int blockSize = preference.length;
+		for(Agent[] order : preference) blockSize += order.length;
+		return blockSize;
+	}
 	//返回当前参与人的破坏对集合S(当前对象是course时通过测试)
 	public Agent[] blockS() {
-		//定义破坏对集合,！！！！
-		Agent [] blocks = new Agent[preference.length];
+		//定义破坏对集合
+		Agent [] blocks = new Agent[blockSize()];
 		//遍历当前参与人的偏好列表，寻找一个破坏对
-		//遍历行
+		//i-->blocks数组中插入参与人的位置
 		int i = 0;
+		//遍历偏好序
 		for(Agent[] order : preference()) {
 			for(Agent agent : order) {
 				//当前对象与agent已匹配，直接跳过
 				if(matched(agent)) continue;
-				//将破坏对添加到破坏对集合中
+				//agent若与当前对象构成破坏对，将agent添加到当前对象的破坏对集合
 				if(block(agent)) {
-					
 					//blocks数组默认存null，只需要在索引范围内找到第一个null
-					while(blocks[i++] != null && i < blocks.length) {
+					while(i < blocks.length && blocks[i++] != null) {
 					}
-					//agent若与当前对象构成破坏对，将agent添加到当前对象的破坏对集合
+					//将agent添加到当前对象的破坏对集合中
 					blocks[i - 1] = agent;
 				}
 			}
 		}
+
 		//去除blocks中的null
 		Agent[] results = new Agent[i];
 		System.arraycopy(blocks, 0, results, 0, i);
@@ -184,7 +195,8 @@ public class Agent{
 	}
 	//返回破坏对集合S的最偏好个体s
 	public Agent maxpreS(Agent[] blockS) {
-		this.BubbleSort(blockS);
+		//this.BubbleSort(blockS);
+		
 		return blockS[0];
 	}
 	//达成匹配
@@ -207,10 +219,11 @@ public class Agent{
 		//更新onhold
 		this.increaseOnhold();
 		agent.increaseOnhold();
-		System.out.println("参与人 " + this.name() + " 与参与人 " + agent.name() + " 达成匹配");
+		System.out.println("参与人 " + this.name() + "(已使用的匹配额度"+ this.onhold + ")" + " 与参与人 " + agent.name() + "(已使用的匹配额度"+ agent.onhold + ")" + " 达成匹配");
+		
 	}
 	//取消course-student匹配，当前对象为course
-	public void unassign() {
+	public Agent unassign() {
 		//最偏好的个体无容量余额时，需要取消匹配
 		if(!lessCap()) {
 			//找到该个体已匹配参与人中最差的参与人
@@ -220,16 +233,43 @@ public class Agent{
 			this.onhold--;		
 			//对于有虚拟容量限制的参与人还需要回退虚拟容量		
 			//同时从最差参与人个体中删除该个体
-			Agent[] find = agent.matches();
-			for(int i = 0; i < find.length; i++) {
-				if(agent.matches[i] == this) {
-					agent.matches[i] = null;
-					agent.onhold--;
-					agent.vcapacity--;			
-				}
-			}	
-			System.out.println("参与人 " + this.name() + " 与参与人 " + agent.name() + " 取消匹配");
+			agent.del(this);
+			System.out.println("参与人 " + this.name() + "(已使用的匹配额度"+ this.onhold + ")" + " 与参与人 " + agent.name() + "(已使用的匹配额度"+ agent.onhold + ")" + " 取消匹配");
+			return agent;
 		}
+		return null;
+	}/*遍历matches数组时可能会抛出空指针异常*/
+	//添加匹配对后可能会出现augmentationcycle，调用此方法回退本次匹配
+	//取消当前对象与agent对象的匹配
+	public void unassignCycle(Agent agent) {
+		//找到当前对象匹配集合中的agent,并在集合中删除
+		this.del(agent);
+		//找到agent匹配集合中的当前对象,并在集合中删除
+		agent.del(this);
+		System.out.println("出现augmentation cycle， 参与人 " + this.name() + "(已使用的匹配额度"+ this.onhold + ")" + " 与参与人 " + agent.name() + "(已使用的匹配额度"+ agent.onhold + ")" + " 取消匹配");
+	}
+	//从当前对象匹配集合中删除指定参与人
+	private void del(Agent agent) {
+		for(int i = 0; i < this.matches.length; i++) {
+			if(agent.equals(this.matches[i])) {
+				this.matches[i] = null;
+				this.onhold--;
+				if(isSuitor) this.vcapacity--;
+				break;
+			}
+		}
+	}
+	//当前对象认为agent1至少和agent2一样好
+	public boolean weak(Agent agent1, Agent agent2) {
+		return indexOf(agent1) <= indexOf(agent2);
+	}
+	//当前对象认为agent1比agent2好
+	public boolean strict(Agent agent1, Agent agent2) {
+		return indexOf(agent1) < indexOf(agent2);
+	}
+	//当前对象认为agent1和agent2一样好
+	public boolean indifferent(Agent agent1, Agent agent2) {
+		return indexOf(agent1) == indexOf(agent2);
 	}
 	//破坏对集合中的参与人排序，找出最偏好的参与人
 	public  void BubbleSort(Agent[] agents) {
@@ -240,7 +280,7 @@ public class Agent{
 		}
 	}
 	private  boolean greater(Agent v, Agent w) {
-		return indexOf(v) >= indexOf(w);
+		return indexOf(v) > indexOf(w);
 	}
 	private  void exchange(Agent []agents, int x, int y) {
 		Agent t = agents[x];
