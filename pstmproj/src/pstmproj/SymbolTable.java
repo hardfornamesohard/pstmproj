@@ -1,6 +1,6 @@
-package util;
+package pstmproj;
 
-import pstmproj.Agent;
+
 
 public class SymbolTable<Key, Value> {
 
@@ -37,13 +37,13 @@ public class SymbolTable<Key, Value> {
 		return values;
 	}
 	public void put(Key key, Value value) {
-		//·ûºÅ±íÖÐÒÑÓÐ¸ÃkeyÖµ,ÇÒÒÑÓÐ¸Ävalue£¬ÔòÌø¹ý
+		//ï¿½ï¿½ï¿½Å±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¸ï¿½keyÖµ,ï¿½ï¿½ï¿½ï¿½ï¿½Ð¸ï¿½valueï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		Node n = head;
 		while(n.next!=null) {
 			n = n.next;
 			if(n.key == key && n.value == value) return;
 		}
-		//·ûºÅ±íÖÐ²»´æÔÚ¸Ãkey-value¶Ô
+		//ï¿½ï¿½ï¿½Å±ï¿½ï¿½Ð²ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½key-valueï¿½ï¿½
 		Node oldfirst = head.next;
 		Node newfirst = new Node(key,value,oldfirst);
 		head.next = newfirst;

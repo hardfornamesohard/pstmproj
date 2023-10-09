@@ -1,8 +1,6 @@
 package pstmproj;
 
 
-import util.SymbolTable;
-
 public class PSTM {
 	private Agent[] students;
 	private Agent[] courses;

@@ -1,7 +1,5 @@
 package pstmproj;
 
-import util.SymbolTable;
-
 public class PSTMSolution {
 
 	public static void main(String args[]) {
