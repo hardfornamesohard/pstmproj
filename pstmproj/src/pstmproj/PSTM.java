@@ -273,17 +273,13 @@ public class PSTM {
 			System.out.print(agent + ",");
 		}
 		System.out.println("]");
-		Iterator<Agent> iter = matches.keys().iterator();
-		while (iter.hasNext())
-		{
-			Agent key = iter.next();
-			if (key == null) continue;
-			Agent[] agents = matches.get(key);
-			System.out.print(key + " ");
-			for (Agent agent : agents) {
-				System.out.print(agent + ", ");
+		for(Agent course : courses) {
+			int i = 0;
+			while(matches.get(course) != null && i < course.matches().length&& course.matches()[i]!=null ) {
+				System.out.println(course+ " <---> " + course.matches()[i]);
+				i++;
 			}
-			System.out.println();
+
 		}
 	}
 

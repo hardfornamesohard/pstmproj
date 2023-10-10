@@ -274,6 +274,7 @@ public class Agent{
 				break;
 			}
 		}
+
 	}
 	//当前对象认为agent1至少和agent2一样好
 	public boolean weak(Agent agent1, Agent agent2) {

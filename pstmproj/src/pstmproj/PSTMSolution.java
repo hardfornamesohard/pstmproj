@@ -13,13 +13,13 @@ public class PSTMSolution {
 		System.out.println();
 		System.out.println("Æ¥Åä½á¹û:");
 		SymbolTable<Agent, Agent> matches = pstm.matchSet();
-		for(Agent agent : courses) {
+		for(Agent course : courses) {
 			int i = 0;
-			while(matches.get(agent) != null && i < matches.get(agent).length) {
-				System.out.println(agent.name() + " <---> " + matches.get(agent)[i].name());
+			while(matches.get(course) != null && i < course.matches().length&& course.matches()[i]!=null ) {
+				System.out.println(course+ " <---> " + course.matches()[i]);
 				i++;
 			}
-			
+
 		}
 		for(Agent agent : students) {
 			System.out.println(agent.name() + " vcapacity is : " + agent.vcapacity());
