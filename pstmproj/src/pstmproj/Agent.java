@@ -106,11 +106,9 @@ public class Agent{
 		return false;
 	}
 	//判断agent是否与当前对象匹配
-	public boolean matched(Agent agent) {
-		if(onhold == 0) return false;
-		if(agent == null) return false;
+	public boolean isMatched(Agent agent) {
+		if(onhold == 0 || agent == null) return false;
 		for(Agent a : matches) {
-			
 			if(agent.equals(a)) return true;
 		}
 		return false;
@@ -191,7 +189,7 @@ public class Agent{
 		for(Agent[] order : preference()) {
 			for(Agent agent : order) {
 				//当前对象与agent已匹配，直接跳过
-				if(matched(agent)) continue;
+				if(isMatched(agent)) continue;
 				//agent若与当前对象构成破坏对，将agent添加到当前对象的破坏对集合
 				if(block(agent)) {
 					//blocks数组默认存null，只需要在索引范围内找到第一个null
@@ -257,7 +255,7 @@ public class Agent{
 	}/*遍历matches数组时可能会抛出空指针异常*/
 	//添加匹配对后可能会出现augmentationcycle，调用此方法回退本次匹配
 	//取消当前对象与agent对象的匹配
-	public void unassignCycle(Agent agent) {
+	public void unassign(Agent agent) {
 		//找到当前对象匹配集合中的agent,并在集合中删除
 		this.del(agent);
 		//找到agent匹配集合中的当前对象,并在集合中删除

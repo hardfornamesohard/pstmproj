@@ -10,13 +10,14 @@ public class PSTM {
 	private Agent[] courses;
 	//当前的匹配对集合，key存course，value存course-student
 	private SymbolTable<Agent, Agent> matches;
-	private boolean[] marked;
+	private Agent[] e = new Agent[2];
+
 
 	public PSTM() {
 		initAgents();
 		initPreference();
-		matches = new SymbolTable<Agent, Agent>();
-		marked = new boolean[students.length];
+		matches = new SymbolTable<>();
+
 	}
 	public void initAgents() {
 		students = new Agent[3];
@@ -84,6 +85,11 @@ public class PSTM {
 	}
 	//augmentationcycle是已匹配的参与人集合，若不存在则返回null,
 	private Agent[] hasAugmentationCycle() {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException interruptedException) {
+			interruptedException.printStackTrace();
+		}
 
 		//获取已匹配参与人集合，偶数下标存放student，奇数下标存放course
 		//得到已匹配的参与人数量，构建cycle
@@ -168,9 +174,9 @@ public class PSTM {
 		//同下标匹配且相邻下标未匹配，则继续判断偏好	
 		for(int i = 0; i < number - 1; i+=2) {
 			if(i == 0) {
-				if(!cycle[i].matched(cycle[number - 1]) || cycle[i].matched(cycle[i+1])) return null;
+				if(!cycle[i].isMatched(cycle[number - 1]) || cycle[i].isMatched(cycle[i+1])) return null;
 			}else {
-					if(!cycle[i].matched(cycle[i-1]) || cycle[i].matched(cycle[i+1])) return null;
+					if(!cycle[i].isMatched(cycle[i-1]) || cycle[i].isMatched(cycle[i+1])) return null;
 				}
 		}
 		
@@ -245,10 +251,9 @@ public class PSTM {
 			Agent[] path = this.hasAugmentationCycle();
 			if(path != null) {
 				//得到C\{(s, c')},不改变path中参与人数量，仅仅是断开匹配
-				student.unassignCycle(maxCourse);
+				student.unassign(maxCourse);
 				
 				//出现增广环时打印取消匹配后的增广路径
-				printPath(path);
 				this.eliminatePath(path);
 			}
 		}
@@ -268,11 +273,77 @@ public class PSTM {
 		}
 	}
 	private void eliminatePath(Agent[] path) {
+
+		printPath(path);
+		System.out.println("消除环路中。。。。。。。。。");
+		int eindex = 0;
 		System.out.print("Path = [");
 		for (Agent agent : path) {
 			System.out.print(agent + ",");
 		}
 		System.out.println("]");
+//		检查是否取消匹配
+//		checkMatches();
+		eIncr(eindex, path);
+
+		while (eIsNotNull())
+		{
+			//取路径上的第eindex对参与人
+			eIncr(eindex, path);
+			Agent first = e[0];
+			Agent second = e[1];
+			System.out.println("e= [" +first+"," +second+ "]");
+			//e不是匹配，尝试匹配
+			if(!first.isMatched(second)){
+				first.asign(second);
+				checkMatches();
+				//产生环路，取消操作，eindex++
+				if ((hasAugmentationCycle()!=null)){
+
+				}else {
+
+					//不产生环路，是否超出容量，否则结束
+					if(first.lessCap() && second.lessCap()) {
+						System.out.println("此次消除环路结束");
+						return;
+					}
+					//是，继续处理
+
+					//判断是否更偏好操作过程中匹配的对象
+
+					//否，则eindex++
+
+					//		是，则取消与当前对象的匹配，虚拟容量变化
+
+				}
+
+			}
+			//e是匹配，尝试取消匹配
+			else {
+				first.unassign(second);
+
+				//不产生环路，则取下一对参与人
+				if (hasAugmentationCycle() == null){
+
+				}else {
+
+				}
+				//否则撤销操作
+
+				//eindex++
+
+			}
+			eindex++;
+		}
+		System.out.println("xiaochuhuanljieshu ");
+	}
+
+	private void eIncr(int eindex, Agent[] path) {
+		if(eindex+2>path.length) return;
+		System.arraycopy(path,eindex,e,0,2);
+	}
+
+	public void checkMatches() {
 		for(Agent course : courses) {
 			int i = 0;
 			while(matches.get(course) != null && i < course.matches().length&& course.matches()[i]!=null ) {
@@ -281,6 +352,10 @@ public class PSTM {
 			}
 
 		}
+	}
+
+	private boolean eIsNotNull() {
+		return e[0] != null && e[1] != null;
 	}
 
 }
