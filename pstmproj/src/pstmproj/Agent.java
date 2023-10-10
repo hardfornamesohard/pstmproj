@@ -1,6 +1,9 @@
 package pstmproj;
 
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 /*
  * 匹配参与人
  */
@@ -25,6 +28,17 @@ public class Agent{
 	//此参与人匹配到的参与人列表，按优劣排序/*对被提议方可能不是*/，每次匹配后需要更新
 	private Agent[] matches;
 	private final boolean isSuitor;
+	//检查cycle时使用，索引处的值对应同索引students数组中的参与人是否匹配
+	private boolean[] marked;
+	public void initMarkedCheckCycle(){
+		Arrays.fill(marked, false);
+	}
+	public void markedCheckCycle(int index){
+		marked[index] = true;
+	}
+	public boolean isMarkedCheckCycle(int index){
+		return marked[index];
+	}
 	public Agent(String name, int capacity, boolean isSuitor) {
 		this.name = name;
 		this.capacity = capacity;
@@ -33,6 +47,7 @@ public class Agent{
 		this.onhold = 0;
 		this.matches = new Agent[capacity];
 		this.isSuitor = isSuitor;
+
 	}
 	public String name() {
 		return this.name;
@@ -45,6 +60,7 @@ public class Agent{
 	}
 	public void addPre(Agent[][] agents) {
 		this.preference = agents;
+		this.marked = new boolean[preference.length];
 	}
 	public void increaseC() {
 		this.vcapacity++;
@@ -286,5 +302,9 @@ public class Agent{
 		Agent t = agents[x];
 		agents[x] = agents[y];
 		agents[y] = t;
+	}
+	@Override
+	public String toString(){
+		return name;
 	}
 }

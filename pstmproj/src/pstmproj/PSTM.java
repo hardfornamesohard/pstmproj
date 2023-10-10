@@ -1,13 +1,17 @@
 package pstmproj;
 
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Set;
+
 public class PSTM {
 	private Agent[] students;
 	private Agent[] courses;
 	//当前的匹配对集合，key存course，value存course-student
 	private SymbolTable<Agent, Agent> matches;
-	//检查cycle时使用，索引处的值对应同索引students数组中的参与人是否匹配
 	private boolean[] marked;
+
 	public PSTM() {
 		initAgents();
 		initPreference();
@@ -80,28 +84,32 @@ public class PSTM {
 	}
 	//augmentationcycle是已匹配的参与人集合，若不存在则返回null,
 	private Agent[] hasAugmentationCycle() {
-		for(int i = 0; i < marked.length; i++) {
-			marked[i] = false;
-		}
+
 		//获取已匹配参与人集合，偶数下标存放student，奇数下标存放course
 		//得到已匹配的参与人数量，构建cycle
 		int number = 0;
 		for(Agent course : courses) {
-			Agent[] stu = (Agent[])matches.get(course);
+			Agent[] stu = matches.get(course);
 			if(stu != null) {
+				//course 已匹配，需要标记
+				course.initMarkedCheckCycle();
 				//此course已匹配，计数
 				number++;
+//				System.out.println("course 计数 " + number);
 				for(Agent agent : stu) {
-					int stuIndex = indexOf(agent, stu);
-					if(marked[stuIndex] == false) {
+					int stuIndex = indexOf(agent, stu);//
+
+					if(!course.isMarkedCheckCycle(stuIndex)) {
 						//此student第一次出现在匹配中，计数
 						number++;
+//						System.out.println("student 计数 " + number);
 						//标记，以免student被其他course匹配时出现重复计数
-						marked[stuIndex] = true;
+						course.markedCheckCycle(stuIndex);
 					}
 				}
 			}
 		}
+
 		if((number < 3) | (number % 2 != 0)) return null;
 		//将已匹配的参与人按cycle排列
 		Agent[] cycle = new Agent[number];
@@ -116,31 +124,35 @@ public class PSTM {
 				
 		}*/
 		//实际得到[s1, c1, s2, c2]，未按路径排列，需断开匹配
-		int cindex = 1;
+		int cindex = 1, sindex = 0;
 		for(Agent course : courses) {
 			//course已匹配才加入cycle
 			if(matches.get(course) != null) {
 				cycle[cindex] = course;
-				for(Agent agent : matches.get(course)) {
-					int index = this.indexOf(agent, students);
+				Agent[] matchedToCourse = matches.get(course);
+				for(Agent student : matchedToCourse) {
+					int index = this.indexOf(student, students);
 					//System.out.print(agent.name() + " " + index + " ,");
 					//跳过value数组的索引0处的course
-					if(index > -1) marked[index] = true;
-					else continue;
+					if(index == this.indexOf(course, courses)) {
+						cycle[sindex] = student;
+						sindex += 2;
+					}
 				}
 				cindex += 2;
 			}
 		}
+
 		//for(boolean b : marked) System.out.print(b + " ,");
-		int sindex = 0;
-		for(Agent student : students) {
-			int index = this.indexOf(student, students);
-			if(marked[index] == true && sindex < cycle.length) {
-				cycle[sindex] = student;
-				sindex += 2;
-			}
-		}
-		System.out.println(number);
+//		int sindex = 0;
+//		for(Agent student : students) {
+//			int index = this.indexOf(student, students);
+//			if(marked[index] && sindex < cycle.length) {
+//				cycle[sindex] = student;
+//				sindex += 2;
+//			}
+//		}
+//		System.out.println(number);
 		//[s1, c1, s2, c2]调整顺序 变成 ---> [s2, c1, s1, c2]
 		//索引0处和索引2，4，6，8，...处交换元素
 		
@@ -149,7 +161,10 @@ public class PSTM {
 			exchange(cycle, 0, exch);
 			exch += 2;
 		}
-		
+//		print cycle
+//		for (Agent agent : cycle) {
+//			System.out.println(agent);
+//		}
 		//同下标匹配且相邻下标未匹配，则继续判断偏好	
 		for(int i = 0; i < number - 1; i+=2) {
 			if(i == 0) {
@@ -215,10 +230,13 @@ public class PSTM {
 			if(blocks.length == 0) continue;
 			Agent maxCourse = student.maxpreS(blocks);
 			//student最偏好的course没有容量时，解除匹配到的最差student
-			Agent del = maxCourse.unassign();
-			if(del != null) {
-				matches.delete(maxCourse, del);
+			if(!maxCourse.lessCap()) {
+				Agent del = maxCourse.unassign();
+				if (del != null) {
+					matches.delete(maxCourse, del);
+				}
 			}
+			//匹配s的maxCourse
 			//increase-cap 6a&6c
 			student.asign(maxCourse);
 			matches.put(maxCourse, student);
@@ -237,7 +255,7 @@ public class PSTM {
 	}
 	public void printPath(Agent[] path) {
 		if(path != null) {
-			System.out.println("augmentation cycle occured!");
+			System.out.printf("取消匹配后的augmentation path = ");
 			StringBuilder sb = new StringBuilder();
 			sb.append("[");
 			for(Agent agent : path) {
@@ -250,7 +268,23 @@ public class PSTM {
 		}
 	}
 	private void eliminatePath(Agent[] path) {
-		
+		System.out.print("Path = [");
+		for (Agent agent : path) {
+			System.out.print(agent + ",");
+		}
+		System.out.println("]");
+		Iterator<Agent> iter = matches.keys().iterator();
+		while (iter.hasNext())
+		{
+			Agent key = iter.next();
+			if (key == null) continue;
+			Agent[] agents = matches.get(key);
+			System.out.print(key + " ");
+			for (Agent agent : agents) {
+				System.out.print(agent + ", ");
+			}
+			System.out.println();
+		}
 	}
 
 }

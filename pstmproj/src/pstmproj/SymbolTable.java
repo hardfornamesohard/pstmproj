@@ -1,6 +1,9 @@
 package pstmproj;
 
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 public class SymbolTable<Key, Value> {
 
@@ -70,5 +73,18 @@ public class SymbolTable<Key, Value> {
 			this.next = next;
 		}
 		
+	}
+	public Set<Key> keys(){
+		Set<Key> keys = new HashSet<>();
+		if(head == null) return null;
+		for (int i = 0; i < N; i++) {
+			keys.add(head.key);
+			head = head.next;
+		}
+		Iterator<Key> iterator = keys.iterator();
+		while (iterator.hasNext()){
+			System.out.println(iterator.next());
+		}
+		return keys;
 	}
 }
