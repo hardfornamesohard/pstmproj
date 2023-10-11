@@ -19,8 +19,8 @@ public class PSTM {
 
 	}
 	public void initAgents() {
-		students = new Agent[4];
-		courses = new Agent[4];
+		students = new Agent[8];
+		courses = new Agent[8];
 		students[0] = new Agent("s1", 1, true);
 		students[1] = new Agent("s2", 1, true);
 		students[2] = new Agent("s3", 1, true);
@@ -30,6 +30,7 @@ public class PSTM {
 		courses[2] = new Agent("c3", 1, false);
 		courses[3] = new Agent("c4", 2, false);
 		for(Agent course : courses) {
+			if (course == null)continue;
 			course.increaseMax();
 		}
 	}
@@ -109,6 +110,8 @@ public void initPreference()
 	public boolean check(Agent[] agents)
 	{
 		for(Agent agent : agents) {
+			if(agent == null) continue;
+
 			if(agent.addCap()) return true;
 		}
 		return false;
@@ -271,8 +274,9 @@ public void initPreference()
 	}
 	private void increaseCap(){
 		for(Agent student : students) {
+
 			//选择student，增加虚拟容量直到达到真实容量
-			if(student.vcapacity() == student.capacity()) continue;
+			if(student == null || student.vcapacity() == student.capacity()) continue;
 			student.increaseC();
 			//student当前的破坏对集合
 			Agent[] blocks = student.blockS();
@@ -285,7 +289,10 @@ public void initPreference()
 				Agent del = maxCourse.unassign();
 				if (del != null) {
 					//TODO student被删除后需要让student重新回到提议队列
-					if (del.isSuitor) del.recoverVc();
+					if (del.isSuitor) {
+						del.recoverVc();
+						addDelStudent(findNextNullIndex(), del);
+					}
 					matches.get(maxCourse).remove(del);
 
 				}
@@ -311,6 +318,31 @@ public void initPreference()
 			}
 		}
 	}
+
+	private void addDelStudent(int nextNullIndex, Agent stu) {
+		students[nextNullIndex] = stu;
+	}
+
+	private int findNextNullIndex() {
+		int nextNull = 0;
+		for (Agent student : students) {
+			if(student!=null) nextNull++;
+			else return nextNull;
+		}
+		//扩容
+		if(nextNull == students.length) {
+			addStudentsCapacity();
+			return nextNull;
+		}
+		return -1;
+	}
+
+	private void addStudentsCapacity() {
+		Agent[] newArr = new Agent[2*students.length];
+		System.arraycopy(students, 0, newArr, 0, students.length);
+		students = newArr;
+	}
+
 	public void printPath(Agent[] path) {
 		if(path != null) {
 			System.out.printf("取消匹配后的augmentation path = ");
@@ -451,13 +483,13 @@ public void initPreference()
 //				System.out.println(course+ " <---> " + stu);
 //			}
 //		}
-		for(Agent course : students) {
-
-			Agent[] matchToCourse = course.matches();
-			if (matchToCourse == null) return;
-			for (Agent stu : matchToCourse) {
-				if (stu == null) continue;
-				System.out.println(course+ " <---> " + stu);
+		for(Agent student : students) {
+			if (student == null) continue;
+			Agent[] matchToStu = student.matches();
+			if (matchToStu == null) return;
+			for (Agent course : matchToStu) {
+				if (course == null) continue;
+				System.out.println(student+ " <---> " + course);
 			}
 		}
 	}

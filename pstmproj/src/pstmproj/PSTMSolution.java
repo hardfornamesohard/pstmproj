@@ -17,6 +17,7 @@ public class PSTMSolution {
 		System.out.println("Æ¥Åä½á¹û:");
 		pstm.checkMatches();
 		for(Agent agent : students) {
+			if(agent == null) continue;
 			System.out.println(agent.name() + " vcapacity is : " + agent.vcapacity());
 			
 		}
