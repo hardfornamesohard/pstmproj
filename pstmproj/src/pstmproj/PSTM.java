@@ -1,64 +1,104 @@
 package pstmproj;
 
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Set;
+import javax.swing.*;
+import java.util.*;
 
 public class PSTM {
 	private Agent[] students;
 	private Agent[] courses;
 	//当前的匹配对集合，key存course，value存course-student
-	private SymbolTable<Agent, Agent> matches;
+	private HashMap<Agent, List<Agent>> matches;
 	private Agent[] e = new Agent[2];
 
 
 	public PSTM() {
 		initAgents();
 		initPreference();
-		matches = new SymbolTable<>();
+		matches = new HashMap<>();
 
 	}
 	public void initAgents() {
-		students = new Agent[3];
-		courses = new Agent[3];
+		students = new Agent[4];
+		courses = new Agent[4];
 		students[0] = new Agent("s1", 1, true);
-		students[1] = new Agent("s2", 2, true);
+		students[1] = new Agent("s2", 1, true);
 		students[2] = new Agent("s3", 1, true);
-		//students[3] = new Agent("s4", 1);
+		students[3] = new Agent("s4", 2, true);
 		courses[0] = new Agent("c1", 1, false);
 		courses[1] = new Agent("c2", 2, false);
 		courses[2] = new Agent("c3", 1, false);
-		//courses[3] = new Agent("c4", 2);
+		courses[3] = new Agent("c4", 2, false);
 		for(Agent course : courses) {
 			course.increaseMax();
 		}
 	}
-	public void initPreference()
-	{
-		//Agent [][] pre1 = {{courses[0]}, {courses[3]}, {courses[2]}, {courses[1]}};
-		Agent [][] pre1 = {{courses[0], courses[1]}};
-		students[0].addPre(pre1);
-		//Agent [][] pre2 = {{courses[0]}, {courses[2]}, {courses[3]}, {courses[1]}};
-		Agent [][] pre2 = {{courses[0]}, {courses[1]}, {courses[2]}};
-		students[1].addPre(pre2);
-		//Agent [][] pre3 = {{courses[3]}, {courses[0]}, {courses[2],courses[0]}, {courses[1]}};
-		Agent [][] pre3 = {{courses[1]}};
-		students[2].addPre(pre3);
-		//Agent [][] pre7 = {{courses[0]}, {courses[2]}, {courses[1]}, {courses[3]}};
-		//students[3].addPre(pre7);
-		//Agent [][] pre4 = {{students[3]}, {students[0]}, {students[2]}, {students[1]}};
-		Agent [][] pre4 = {{students[0], students[1]}};
-		courses[0].addPre(pre4);
-		//Agent [][] pre5 = {{students[0]}, {students[3]}, {students[2]}, {students[1]}};
-		Agent [][] pre5 = {{students[0]}, {students[1]}, {students[2]}};
-		courses[1].addPre(pre5);
-		//Agent [][] pre6 = {{students[0]}, {students[2]}, {students[3]}, {students[1]}};
-		Agent [][] pre6 = {{students[1]}};
-		courses[2].addPre(pre6);
-		//Agent [][] pre8 = {{students[0]}, {students[2]}, {students[1]}, {students[3]}};
-		//courses[3].addPre(pre8);
-	}
+//	public void initAgents() {
+//		students = new Agent[3];
+//		courses = new Agent[3];
+//		students[0] = new Agent("s1", 1, true);
+//		students[1] = new Agent("s2", 2, true);
+//		students[2] = new Agent("s3", 1, true);
+//		//students[3] = new Agent("s4", 1);
+//		courses[0] = new Agent("c1", 1, false);
+//		courses[1] = new Agent("c2", 2, false);
+//		courses[2] = new Agent("c3", 1, false);
+//		//courses[3] = new Agent("c4", 2);
+//		for(Agent course : courses) {
+//			course.increaseMax();
+//		}
+//	}
+//	public void initPreference()
+//	{
+//		//Agent [][] pre1 = {{courses[0]}, {courses[3]}, {courses[2]}, {courses[1]}};
+//		Agent [][] pre1 = {{courses[0], courses[1]}};
+//		students[0].addPre(pre1);
+//		//Agent [][] pre2 = {{courses[0]}, {courses[2]}, {courses[3]}, {courses[1]}};
+//		Agent [][] pre2 = {{courses[0]}, {courses[1]}, {courses[2]}};
+//		students[1].addPre(pre2);
+//		//Agent [][] pre3 = {{courses[3]}, {courses[0]}, {courses[2],courses[0]}, {courses[1]}};
+//		Agent [][] pre3 = {{courses[1]}};
+//		students[2].addPre(pre3);
+//		//Agent [][] pre7 = {{courses[0]}, {courses[2]}, {courses[1]}, {courses[3]}};
+//		//students[3].addPre(pre7);
+//		//Agent [][] pre4 = {{students[3]}, {students[0]}, {students[2]}, {students[1]}};
+//		Agent [][] pre4 = {{students[0], students[1]}};
+//		courses[0].addPre(pre4);
+//		//Agent [][] pre5 = {{students[0]}, {students[3]}, {students[2]}, {students[1]}};
+//		Agent [][] pre5 = {{students[0]}, {students[1]}, {students[2]}};
+//		courses[1].addPre(pre5);
+//		//Agent [][] pre6 = {{students[0]}, {students[2]}, {students[3]}, {students[1]}};
+//		Agent [][] pre6 = {{students[1]}};
+//		courses[2].addPre(pre6);
+//		//Agent [][] pre8 = {{students[0]}, {students[2]}, {students[1]}, {students[3]}};
+//		//courses[3].addPre(pre8);
+//	}
+public void initPreference()
+{
+	//Agent [][] pre1 = {{courses[0]}, {courses[3]}, {courses[2]}, {courses[1]}};
+	Agent [][] pre1 = {{courses[0], courses[1]}};
+	students[0].addPre(pre1);
+	//Agent [][] pre2 = {{courses[0]}, {courses[2]}, {courses[3]}, {courses[1]}};
+	Agent [][] pre2 = {{courses[0]}, {courses[1]}, {courses[2]}};
+	students[1].addPre(pre2);
+	//Agent [][] pre3 = {{courses[3]}, {courses[0]}, {courses[2],courses[0]}, {courses[1]}};
+	Agent [][] pre3 = {{courses[1]}};
+	students[2].addPre(pre3);
+	Agent [][] pre7 = {{courses[0]}, {courses[3]}, {courses[1]}, {courses[2]}};
+	students[3].addPre(pre7);
+	//Agent [][] pre4 = {{students[3]}, {students[0]}, {students[2]}, {students[1]}};
+	Agent [][] pre4 = {{students[3]},{students[0], students[1]}};
+	courses[0].addPre(pre4);
+	//Agent [][] pre5 = {{students[0]}, {students[3]}, {students[2]}, {students[1]}};
+	Agent [][] pre5 = {{students[0]}, {students[1]}, {students[2]}};
+	courses[1].addPre(pre5);
+	//Agent [][] pre6 = {{students[0]}, {students[2]}, {students[3]}, {students[1]}};
+	Agent [][] pre6 = {{students[1]}};
+	courses[2].addPre(pre6);
+
+	Agent [][] pre8 = {{students[0]}, {students[2]}, {students[1]}, {students[3]}};
+	courses[3].addPre(pre8);
+}
 	public Agent[] students() {
 		return this.students;
 	}
@@ -73,7 +113,7 @@ public class PSTM {
 		}
 		return false;
 	}
-	public SymbolTable<Agent, Agent> matchSet(){
+	public HashMap<Agent, List<Agent>> matchSet(){
 		return matches;
 	}
 	//增加虚拟容量，进行匹配
@@ -86,7 +126,7 @@ public class PSTM {
 	//augmentationcycle是已匹配的参与人集合，若不存在则返回null,
 	private Agent[] hasAugmentationCycle() {
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(1);
 		} catch (InterruptedException interruptedException) {
 			interruptedException.printStackTrace();
 		}
@@ -95,15 +135,17 @@ public class PSTM {
 		//得到已匹配的参与人数量，构建cycle
 		int number = 0;
 		for(Agent course : courses) {
-			Agent[] stu = matches.get(course);
-			if(stu != null) {
+			List<Agent> courseMatchedStu = matches.get(course);
+			if(courseMatchedStu != null) {
 				//course 已匹配，需要标记
 				course.initMarkedCheckCycle();
 				//此course已匹配，计数
 				number++;
 //				System.out.println("course 计数 " + number);
-				for(Agent agent : stu) {
-					int stuIndex = indexOf(agent, stu);//
+//				System.out.print(course);
+				for(Agent stu : courseMatchedStu) {
+					int stuIndex = indexOf(stu, courseMatchedStu.toArray(new Agent[courseMatchedStu.size()]));//
+//					System.out.print("," + stu);
 
 					if(!course.isMarkedCheckCycle(stuIndex)) {
 						//此student第一次出现在匹配中，计数
@@ -113,6 +155,7 @@ public class PSTM {
 						course.markedCheckCycle(stuIndex);
 					}
 				}
+
 			}
 		}
 
@@ -135,7 +178,7 @@ public class PSTM {
 			//course已匹配才加入cycle
 			if(matches.get(course) != null) {
 				cycle[cindex] = course;
-				Agent[] matchedToCourse = matches.get(course);
+				List<Agent> matchedToCourse = matches.get(course);
 				for(Agent student : matchedToCourse) {
 					int index = this.indexOf(student, students);
 					//System.out.print(agent.name() + " " + index + " ,");
@@ -174,7 +217,9 @@ public class PSTM {
 		//同下标匹配且相邻下标未匹配，则继续判断偏好	
 		for(int i = 0; i < number - 1; i+=2) {
 			if(i == 0) {
-				if(!cycle[i].isMatched(cycle[number - 1]) || cycle[i].isMatched(cycle[i+1])) return null;
+
+				if(cycle[i] == null) return null;
+				if(cycle[i]!=null && !cycle[i].isMatched(cycle[number - 1]) || cycle[i].isMatched(cycle[i+1])) return null;
 			}else {
 					if(!cycle[i].isMatched(cycle[i-1]) || cycle[i].isMatched(cycle[i+1])) return null;
 				}
@@ -239,20 +284,28 @@ public class PSTM {
 			if(!maxCourse.lessCap()) {
 				Agent del = maxCourse.unassign();
 				if (del != null) {
-					matches.delete(maxCourse, del);
+					//TODO student被删除后需要让student重新回到提议队列
+					if (del.isSuitor) del.recoverVc();
+					matches.get(maxCourse).remove(del);
+
 				}
 			}
 			//匹配s的maxCourse
 			//increase-cap 6a&6c
 			student.asign(maxCourse);
-			matches.put(maxCourse, student);
+			if(matches.containsKey(maxCourse)) matches.get(maxCourse).add(student);
+			else {
+				List<Agent> stu = new ArrayList<>();
+				stu.add(student);
+				matches.put(maxCourse, stu);
+			}
 			//increase-cap 6b
 			//达成匹配会产生augmentationCycle则回退
 			Agent[] path = this.hasAugmentationCycle();
 			if(path != null) {
 				//得到C\{(s, c')},不改变path中参与人数量，仅仅是断开匹配
 				student.unassign(maxCourse);
-				
+				matches.get(maxCourse).remove(student);
 				//出现增广环时打印取消匹配后的增广路径
 				this.eliminatePath(path);
 			}
@@ -289,12 +342,14 @@ public class PSTM {
 		while (eIsNotNull())
 		{
 			//取路径上的第eindex对参与人
+			if(eindex+2>path.length) break;
 			eIncr(eindex, path);
 			Agent first = e[0];
 			Agent second = e[1];
-			System.out.println("e= [" +first+"," +second+ "]");
+//			System.out.println("e= [" +first+"," +second+ "]");
 			//e不是匹配，尝试匹配
 			if(!first.isMatched(second)){
+				System.out.println("尝试匹配" + "e= [" +first+"," +second+ "]");
 				first.asign(second);
 				checkMatches();
 				//产生环路，取消操作，eindex++
@@ -302,14 +357,53 @@ public class PSTM {
 
 				}else {
 
-					//不产生环路，是否超出容量，否则结束
-					if(first.lessCap() && second.lessCap()) {
-						System.out.println("此次消除环路结束");
+					//不产生环路，是否超出容量，
+					//是，继续处理
+					// 判断是否更偏好操作过程中匹配的对象
+					if(!first.lessOrEqualCap() && second.lessOrEqualCap()) {
+						if(first.preferCurThanLeast(second)){
+							Agent leas = first.leastAgent();
+							first.unassign(leas);//取消和最差对象的匹配
+							if(matches.containsKey(first)) matches.get(first).remove(leas);
+							else  matches.get(leas).remove(first);
+							return;
+						}else {
+							//撤销操作
+
+							System.out.printf("%s超出容量且不认为%s比%s严格好，回退\r\n", first,second,first.leastAgent());
+							first.unassign(second);
+							if(matches.containsKey(first)) matches.get(first).remove(second);
+							else  matches.get(second).remove(first);
+						}
+					}else if(!second.lessOrEqualCap() && first.lessOrEqualCap())
+					{
+						if(second.preferCurThanLeast(first)){
+							Agent leas = second.leastAgent();
+							second.unassign(leas);
+							if(matches.containsKey(second)) matches.get(first).remove(leas);
+							else  matches.get(leas).remove(second);
+							return;
+						}else {
+							//撤销操作
+							System.out.printf("%s超出容量且认为%s不比%s严格好，回退\r\n", second,first,second.leastAgent());
+							second.unassign(first);
+							if(matches.containsKey(first)) matches.get(first).remove(second);
+							else  matches.get(second).remove(first);
+						}
+					}else if(!first.lessOrEqualCap() && !second.lessOrEqualCap()){
+						System.out.println(first+"当前匹配个数 "+first.getOnhold() + ", 最大容量" + first.getCapacity() + first.lessOrEqualCap());
+						System.out.println(second+"当前匹配个数 "+second.getOnhold() + ", 最大容量" + second.getCapacity() + second.lessOrEqualCap());
+						System.out.println("都超出～");
+					}
+
+					else {
+						//						否则结束
+						System.out.println("消除环路结束");
+						checkMatches();
 						return;
 					}
-					//是，继续处理
 
-					//判断是否更偏好操作过程中匹配的对象
+
 
 					//否，则eindex++
 
@@ -320,8 +414,10 @@ public class PSTM {
 			}
 			//e是匹配，尝试取消匹配
 			else {
+				System.out.println("尝试取消匹配" + "e= [" +first+"," +second+ "]");
 				first.unassign(second);
-
+				if(matches.containsKey(first)) matches.get(first).remove(second);
+				else  matches.get(second).remove(first);
 				//不产生环路，则取下一对参与人
 				if (hasAugmentationCycle() == null){
 
@@ -333,9 +429,10 @@ public class PSTM {
 				//eindex++
 
 			}
+			checkMatches();
 			eindex++;
 		}
-		System.out.println("xiaochuhuanljieshu ");
+		System.out.println("消除环==路结束 ");
 	}
 
 	private void eIncr(int eindex, Agent[] path) {
@@ -344,13 +441,24 @@ public class PSTM {
 	}
 
 	public void checkMatches() {
-		for(Agent course : courses) {
-			int i = 0;
-			while(matches.get(course) != null && i < course.matches().length&& course.matches()[i]!=null ) {
-				System.out.println(course+ " <---> " + course.matches()[i]);
-				i++;
-			}
+		System.out.println("----------------打印匹配情况------------------");
+//		for(Agent course : courses) {
+//
+//			Agent[] matchToCourse = course.matches();
+//			if (matchToCourse == null) return;
+//			for (Agent stu : matchToCourse) {
+//				if (stu == null) continue;
+//				System.out.println(course+ " <---> " + stu);
+//			}
+//		}
+		for(Agent course : students) {
 
+			Agent[] matchToCourse = course.matches();
+			if (matchToCourse == null) return;
+			for (Agent stu : matchToCourse) {
+				if (stu == null) continue;
+				System.out.println(course+ " <---> " + stu);
+			}
 		}
 	}
 

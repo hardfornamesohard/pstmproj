@@ -1,5 +1,8 @@
 package pstmproj;
 
+import java.util.HashMap;
+import java.util.List;
+
 public class PSTMSolution {
 
 	public static void main(String args[]) {
@@ -12,7 +15,6 @@ public class PSTMSolution {
 		}
 		System.out.println();
 		System.out.println("Æ¥Åä½á¹û:");
-		SymbolTable<Agent, Agent> matches = pstm.matchSet();
 		pstm.checkMatches();
 		for(Agent agent : students) {
 			System.out.println(agent.name() + " vcapacity is : " + agent.vcapacity());
