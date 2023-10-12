@@ -3,12 +3,12 @@ package pstmproj;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Random;
 
 /*
  * 匹配参与人
  */
 public class Agent{
-
 	//参与人名称
 	private final String name;
 	//真实容量
@@ -343,5 +343,27 @@ public class Agent{
 	public void recoverVc() {
 
 		if(vcapacity>0) vcapacity--;
+	}
+
+	public void printPreference() {
+		StringBuilder sb = new StringBuilder();
+		for (Agent[] agents : preference) {
+			sb.append("[");
+			Arrays.stream(agents).sequential().forEach(agent->sb.append(agent).append(","));
+			sb.deleteCharAt(sb.length()-1).append("]").append(",");
+		}
+		sb.deleteCharAt(sb.length()-1);
+		System.out.println(sb);
+	}
+
+	public void initPreferenceRandomly(Agent[] agents, Random random) {
+		int preLen = random.nextInt(agents.length) + 1;
+		Agent[][] preference = new Agent[preLen][];
+		//非严格偏好的长度最长为agents.len/2
+		int maxWeakLen = random.nextInt(agents.length/2) +1;
+		for (int i = 0; i < preLen; i++) {
+			preference[i] = new Agent[maxWeakLen];
+		}
+		this.addPre(preference);
 	}
 }

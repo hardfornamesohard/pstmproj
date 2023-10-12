@@ -1,26 +1,42 @@
 package pstmproj;
 
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.List;
 
 public class PSTMSolution {
 
 	public static void main(String args[]) {
+
 		PSTM pstm = new PSTM();
-		Agent[] students = pstm.students();
-		Agent[] courses = pstm.courses();
+		PrintStream out = System.out;
+		PrintStream printToFile = null;
+		try {
+			 printToFile = new PrintStream("result.txt");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		System.setOut(printToFile);
+
+		pstm.printPreference();
+
+		System.setOut(out);
+
 		System.out.println("匹配过程:");
-		while(pstm.check(students)) {
+		while(pstm.check()) {
 			pstm.matching();
 		}
 		System.out.println();
-		System.out.println("匹配结果:");
+		System.out.println("匹配结束。。。");
+
+		System.setOut(printToFile);
 		pstm.checkMatches();
-		for(Agent agent : students) {
-			if(agent == null) continue;
-			System.out.println(agent.name() + " vcapacity is : " + agent.vcapacity());
-			
-		}
+//		for(Agent agent : students) {
+//			if(agent == null) continue;
+//			System.out.println(agent.name() + " vcapacity is : " + agent.vcapacity());
+//
+//		}
 		/*
 		for(Agent agent : students) {
 			for(Agent a : agent.matches()) {

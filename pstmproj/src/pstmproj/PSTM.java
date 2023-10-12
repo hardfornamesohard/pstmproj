@@ -13,93 +13,17 @@ public class PSTM {
 
 
 	public PSTM() {
-		initAgents();
-		initPreference();
+		init();
 		matches = new HashMap<>();
 
 	}
-	public void initAgents() {
-		students = new Agent[8];
-		courses = new Agent[8];
-		students[0] = new Agent("s1", 1, true);
-		students[1] = new Agent("s2", 1, true);
-		students[2] = new Agent("s3", 1, true);
-		students[3] = new Agent("s4", 2, true);
-		courses[0] = new Agent("c1", 1, false);
-		courses[1] = new Agent("c2", 2, false);
-		courses[2] = new Agent("c3", 1, false);
-		courses[3] = new Agent("c4", 2, false);
-		for(Agent course : courses) {
-			if (course == null)continue;
-			course.increaseMax();
-		}
+	public void init(){
+		PSTMInitializer initializer = new PSTMInitializer();
+		initializer.init();
+		courses = initializer.getCourses();
+		students = initializer.getStudents();
 	}
-//	public void initAgents() {
-//		students = new Agent[3];
-//		courses = new Agent[3];
-//		students[0] = new Agent("s1", 1, true);
-//		students[1] = new Agent("s2", 2, true);
-//		students[2] = new Agent("s3", 1, true);
-//		//students[3] = new Agent("s4", 1);
-//		courses[0] = new Agent("c1", 1, false);
-//		courses[1] = new Agent("c2", 2, false);
-//		courses[2] = new Agent("c3", 1, false);
-//		//courses[3] = new Agent("c4", 2);
-//		for(Agent course : courses) {
-//			course.increaseMax();
-//		}
-//	}
-//	public void initPreference()
-//	{
-//		//Agent [][] pre1 = {{courses[0]}, {courses[3]}, {courses[2]}, {courses[1]}};
-//		Agent [][] pre1 = {{courses[0], courses[1]}};
-//		students[0].addPre(pre1);
-//		//Agent [][] pre2 = {{courses[0]}, {courses[2]}, {courses[3]}, {courses[1]}};
-//		Agent [][] pre2 = {{courses[0]}, {courses[1]}, {courses[2]}};
-//		students[1].addPre(pre2);
-//		//Agent [][] pre3 = {{courses[3]}, {courses[0]}, {courses[2],courses[0]}, {courses[1]}};
-//		Agent [][] pre3 = {{courses[1]}};
-//		students[2].addPre(pre3);
-//		//Agent [][] pre7 = {{courses[0]}, {courses[2]}, {courses[1]}, {courses[3]}};
-//		//students[3].addPre(pre7);
-//		//Agent [][] pre4 = {{students[3]}, {students[0]}, {students[2]}, {students[1]}};
-//		Agent [][] pre4 = {{students[0], students[1]}};
-//		courses[0].addPre(pre4);
-//		//Agent [][] pre5 = {{students[0]}, {students[3]}, {students[2]}, {students[1]}};
-//		Agent [][] pre5 = {{students[0]}, {students[1]}, {students[2]}};
-//		courses[1].addPre(pre5);
-//		//Agent [][] pre6 = {{students[0]}, {students[2]}, {students[3]}, {students[1]}};
-//		Agent [][] pre6 = {{students[1]}};
-//		courses[2].addPre(pre6);
-//		//Agent [][] pre8 = {{students[0]}, {students[2]}, {students[1]}, {students[3]}};
-//		//courses[3].addPre(pre8);
-//	}
-public void initPreference()
-{
-	//Agent [][] pre1 = {{courses[0]}, {courses[3]}, {courses[2]}, {courses[1]}};
-	Agent [][] pre1 = {{courses[0], courses[1]}};
-	students[0].addPre(pre1);
-	//Agent [][] pre2 = {{courses[0]}, {courses[2]}, {courses[3]}, {courses[1]}};
-	Agent [][] pre2 = {{courses[0]}, {courses[1]}, {courses[2]}};
-	students[1].addPre(pre2);
-	//Agent [][] pre3 = {{courses[3]}, {courses[0]}, {courses[2],courses[0]}, {courses[1]}};
-	Agent [][] pre3 = {{courses[1]}};
-	students[2].addPre(pre3);
-	Agent [][] pre7 = {{courses[0]}, {courses[3]}, {courses[1]}, {courses[2]}};
-	students[3].addPre(pre7);
-	//Agent [][] pre4 = {{students[3]}, {students[0]}, {students[2]}, {students[1]}};
-	Agent [][] pre4 = {{students[3]},{students[0], students[1]}};
-	courses[0].addPre(pre4);
-	//Agent [][] pre5 = {{students[0]}, {students[3]}, {students[2]}, {students[1]}};
-	Agent [][] pre5 = {{students[0]}, {students[1]}, {students[2]}};
-	courses[1].addPre(pre5);
-	//Agent [][] pre6 = {{students[0]}, {students[2]}, {students[3]}, {students[1]}};
-	Agent [][] pre6 = {{students[1]}};
-	courses[2].addPre(pre6);
 
-	Agent [][] pre8 = {{students[0]}, {students[2]}, {students[1]}, {students[3]}};
-	courses[3].addPre(pre8);
-}
 	public Agent[] students() {
 		return this.students;
 	}
@@ -107,9 +31,9 @@ public void initPreference()
 		return this.courses;
 	}
 	//检查参与人集合中是否存在虚拟容量小于真实容量的个体
-	public boolean check(Agent[] agents)
+	public boolean check()
 	{
-		for(Agent agent : agents) {
+		for(Agent agent : students) {
 			if(agent == null) continue;
 
 			if(agent.addCap()) return true;
@@ -147,7 +71,7 @@ public void initPreference()
 //				System.out.println("course 计数 " + number);
 //				System.out.print(course);
 				for(Agent stu : courseMatchedStu) {
-					int stuIndex = indexOf(stu, courseMatchedStu.toArray(new Agent[courseMatchedStu.size()]));//
+					int stuIndex = indexOf(stu, courseMatchedStu.toArray(new Agent[0]));//
 //					System.out.print("," + stu);
 
 					if(!course.isMarkedCheckCycle(stuIndex)) {
@@ -179,9 +103,11 @@ public void initPreference()
 		int cindex = 1, sindex = 0;
 		for(Agent course : courses) {
 			//course已匹配才加入cycle
-			if(matches.get(course) != null) {
+			List<Agent> matchedToCourse = matches.get(course);
+			//曾今匹配过才会出现list
+
+			if(matchedToCourse!=null && matchedToCourse.size() != 0) {
 				cycle[cindex] = course;
-				List<Agent> matchedToCourse = matches.get(course);
 				for(Agent student : matchedToCourse) {
 					int index = this.indexOf(student, students);
 					//System.out.print(agent.name() + " " + index + " ,");
@@ -273,13 +199,22 @@ public void initPreference()
 		return false;
 	}
 	private void increaseCap(){
-		for(Agent student : students) {
+		StudentArrayIter<Agent> iter = new StudentArrayIter<>(students);
+		while (iter.hasNext()){
+			Agent student = iter.next();
 
 			//选择student，增加虚拟容量直到达到真实容量
 			if(student == null || student.vcapacity() == student.capacity()) continue;
 			student.increaseC();
+			System.out.println("当前学生是：" + student);
 			//student当前的破坏对集合
 			Agent[] blocks = student.blockS();
+			System.out.println("当前的破坏对集合");
+			for (Agent block : blocks) {
+				System.out.print( block + " ");
+			}
+			System.out.println(student.vcapacity() < student.capacity());
+			System.out.println();
 			//		for(Agent agent : blocks) {if(agent!=null)System.out.println(agent.name());}
 			//选择破坏对集合中最偏好的个体，达成匹配（需判断是否有曾广环路）
 			if(blocks.length == 0) continue;
@@ -288,7 +223,6 @@ public void initPreference()
 			if(!maxCourse.lessCap()) {
 				Agent del = maxCourse.unassign();
 				if (del != null) {
-					//TODO student被删除后需要让student重新回到提议队列
 					if (del.isSuitor) {
 						del.recoverVc();
 						addDelStudent(findNextNullIndex(), del);
@@ -425,7 +359,7 @@ public void initPreference()
 					}else if(!first.lessOrEqualCap() && !second.lessOrEqualCap()){
 						System.out.println(first+"当前匹配个数 "+first.getOnhold() + ", 最大容量" + first.getCapacity() + first.lessOrEqualCap());
 						System.out.println(second+"当前匹配个数 "+second.getOnhold() + ", 最大容量" + second.getCapacity() + second.lessOrEqualCap());
-						System.out.println("都超出～");
+						System.out.println("双方都超出");
 					}
 
 					else {
@@ -473,17 +407,12 @@ public void initPreference()
 	}
 
 	public void checkMatches() {
-		System.out.println("----------------打印匹配情况------------------");
-//		for(Agent course : courses) {
-//
-//			Agent[] matchToCourse = course.matches();
-//			if (matchToCourse == null) return;
-//			for (Agent stu : matchToCourse) {
-//				if (stu == null) continue;
-//				System.out.println(course+ " <---> " + stu);
-//			}
-//		}
+		System.out.println("-------------------------打印匹配情况-------------------------");
+//		打印时去重复
+		List<Agent> printed = new ArrayList<>();
 		for(Agent student : students) {
+
+			if (printed.contains(student)) return;
 			if (student == null) continue;
 			Agent[] matchToStu = student.matches();
 			if (matchToStu == null) return;
@@ -491,6 +420,7 @@ public void initPreference()
 				if (course == null) continue;
 				System.out.println(student+ " <---> " + course);
 			}
+			printed.add(student);
 		}
 	}
 
@@ -498,4 +428,16 @@ public void initPreference()
 		return e[0] != null && e[1] != null;
 	}
 
+	public void printPreference() {
+		System.out.println("-------------------------打印参与人偏好情况-------------------------");
+		Arrays.stream(students).filter(Objects::nonNull).forEach(Agent::printPreference);
+		Arrays.stream(courses).filter(Objects::nonNull).forEach(Agent::printPreference);
+//		for (Agent student : students) {
+//
+//			student.printPreference();
+//		}
+//		for (Agent cours : courses) {
+//			cours.printPreference();
+//		}
+	}
 }
