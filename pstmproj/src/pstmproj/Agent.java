@@ -1,15 +1,19 @@
 package pstmproj;
 
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Random;
+
 /*
  * 匹配参与人
  */
 public class Agent{
-
 	//参与人名称
 	private final String name;
 	//真实容量
 	private final int capacity;
+	public boolean isSuitor;
 	/*参与人偏好列表，索引表示偏好度，最偏好0索引处的参与人
 	***二维数组表示参与人偏好，其中行表示偏好程度顺序，第0行偏好程度最高
 	****行中的所有列表示同一偏好程度的所有对方集合的参与人
@@ -24,15 +28,31 @@ public class Agent{
 	private int onhold;
 	//此参与人匹配到的参与人列表，按优劣排序/*对被提议方可能不是*/，每次匹配后需要更新
 	private Agent[] matches;
-	private final boolean isSuitor;
+
+	//检查cycle时使用，索引处的值对应同索引students数组中的参与人是否匹配
+	private boolean[] marked;
+	public void initMarkedCheckCycle(){
+		Arrays.fill(marked, false);
+	}
+	public void markedCheckCycle(int index){
+		marked[index] = true;
+	}
+	public boolean isMarkedCheckCycle(int index){
+		return marked[index];
+	}
+	public boolean isSuitor(){
+		return isSuitor;
+	}
 	public Agent(String name, int capacity, boolean isSuitor) {
 		this.name = name;
 		this.capacity = capacity;
 		this.preference = null;
 		this.vcapacity = 0;
 		this.onhold = 0;
-		this.matches = new Agent[capacity];
+		//需要多出一个位置
+		this.matches = new Agent[capacity + 1];
 		this.isSuitor = isSuitor;
+
 	}
 	public String name() {
 		return this.name;
@@ -45,6 +65,7 @@ public class Agent{
 	}
 	public void addPre(Agent[][] agents) {
 		this.preference = agents;
+		this.marked = new boolean[3];
 	}
 	public void increaseC() {
 		this.vcapacity++;
@@ -90,11 +111,9 @@ public class Agent{
 		return false;
 	}
 	//判断agent是否与当前对象匹配
-	public boolean matched(Agent agent) {
-		if(onhold == 0) return false;
-		if(agent == null) return false;
+	public boolean isMatched(Agent agent) {
+		if(onhold == 0 || agent == null) return false;
 		for(Agent a : matches) {
-			
 			if(agent.equals(a)) return true;
 		}
 		return false;
@@ -175,7 +194,7 @@ public class Agent{
 		for(Agent[] order : preference()) {
 			for(Agent agent : order) {
 				//当前对象与agent已匹配，直接跳过
-				if(matched(agent)) continue;
+				if(isMatched(agent)) continue;
 				//agent若与当前对象构成破坏对，将agent添加到当前对象的破坏对集合
 				if(block(agent)) {
 					//blocks数组默认存null，只需要在索引范围内找到第一个null
@@ -227,26 +246,26 @@ public class Agent{
 		//最偏好的个体无容量余额时，需要取消匹配
 		if(!lessCap()) {
 			//找到该个体已匹配参与人中最差的参与人
-			Agent agent = this.matches[matches.length-1];
+			Agent agent = leastAgent();
 			//该个体中删除最差参与人
 			this.matches[matches.length-1] = null;
 			this.onhold--;		
 			//对于有虚拟容量限制的参与人还需要回退虚拟容量		
 			//同时从最差参与人个体中删除该个体
 			agent.del(this);
-			System.out.println("参与人 " + this.name() + "(已使用的匹配额度"+ this.onhold + ")" + " 与参与人 " + agent.name() + "(已使用的匹配额度"+ agent.onhold + ")" + " 取消匹配");
+			System.out.println("参与人 " + this.name() + "(已使用的匹配额度"+ this.onhold + ")" + " 与参与人 " + agent.name() + "(已使用的匹配额度"+ agent.onhold + ")" + " ___取消匹配___");
 			return agent;
 		}
 		return null;
 	}/*遍历matches数组时可能会抛出空指针异常*/
 	//添加匹配对后可能会出现augmentationcycle，调用此方法回退本次匹配
 	//取消当前对象与agent对象的匹配
-	public void unassignCycle(Agent agent) {
+	public void unassign(Agent agent) {
 		//找到当前对象匹配集合中的agent,并在集合中删除
 		this.del(agent);
 		//找到agent匹配集合中的当前对象,并在集合中删除
 		agent.del(this);
-		System.out.println("出现augmentation cycle， 参与人 " + this.name() + "(已使用的匹配额度"+ this.onhold + ")" + " 与参与人 " + agent.name() + "(已使用的匹配额度"+ agent.onhold + ")" + " 取消匹配");
+//		System.out.println("出现augmentation cycle， 参与人 " + this.name() + "(已使用的匹配额度"+ this.onhold + ")" + " 与参与人 " + agent.name() + "(已使用的匹配额度"+ agent.onhold + ")" + " 取消匹配");
 	}
 	//从当前对象匹配集合中删除指定参与人
 	private void del(Agent agent) {
@@ -258,6 +277,10 @@ public class Agent{
 				break;
 			}
 		}
+
+	}
+	public int getOnhold(){
+		return onhold;
 	}
 	//当前对象认为agent1至少和agent2一样好
 	public boolean weak(Agent agent1, Agent agent2) {
@@ -286,5 +309,61 @@ public class Agent{
 		Agent t = agents[x];
 		agents[x] = agents[y];
 		agents[y] = t;
+	}
+	@Override
+	public String toString(){
+		return name;
+	}
+
+	//是否更偏好当前cur而不是最差已匹配对象
+	public boolean preferCurThanLeast(Agent cur) {
+		Agent least = this.leastAgent();
+		return indexOf(cur) > indexOf(least);
+	}
+
+	//得到已匹配集合中的最差元素
+	public Agent leastAgent() {
+		int notNull = 0;
+		while(notNull < matches.length && matches[notNull]!=null) notNull++;
+		return matches[notNull-1];
+
+	}
+
+	public boolean lessOrEqualCap() {
+		//如果当前对象是student，判断是否有容量余额需要判断是否小于虚拟容量
+		if(isSuitor) return onhold <= capacity;
+		//当前对象为course判断是否小于真实容量
+		return onhold <= capacity;
+	}
+
+	public int getCapacity() {
+		return capacity;
+	}
+
+	public void recoverVc() {
+
+		if(vcapacity>0) vcapacity--;
+	}
+
+	public void printPreference() {
+		StringBuilder sb = new StringBuilder();
+		for (Agent[] agents : preference) {
+			sb.append("[");
+			Arrays.stream(agents).sequential().forEach(agent->sb.append(agent).append(","));
+			sb.deleteCharAt(sb.length()-1).append("]").append(",");
+		}
+		sb.deleteCharAt(sb.length()-1);
+		System.out.println(sb);
+	}
+
+	public void initPreferenceRandomly(Agent[] agents, Random random) {
+		int preLen = random.nextInt(agents.length) + 1;
+		Agent[][] preference = new Agent[preLen][];
+		//非严格偏好的长度最长为agents.len/2
+		int maxWeakLen = random.nextInt(agents.length/2) +1;
+		for (int i = 0; i < preLen; i++) {
+			preference[i] = new Agent[maxWeakLen];
+		}
+		this.addPre(preference);
 	}
 }
